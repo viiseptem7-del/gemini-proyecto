@@ -11,11 +11,13 @@
             background-color: #e0f7fa;
             color: #333;
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* Cambiado a columna para el footer */
+            justify-content: flex-start; /* Ajustado para que el contenido empiece arriba */
             align-items: center;
             min-height: 100vh;
             margin: 0;
             text-align: center;
+            padding-bottom: 60px; /* Espacio para el footer */
         }
         .container {
             background-color: #fff;
@@ -24,6 +26,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             max-width: 600px;
             width: 100%;
+            margin-bottom: 30px; /* Espacio entre el contenedor principal y el footer */
         }
         h1 {
             color: #00796b;
@@ -126,6 +129,29 @@
             margin-top: 15px;
             display: none;
         }
+        footer {
+            width: 100%;
+            background-color: #004d40;
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            font-size: 0.9em;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        }
+        footer p {
+            margin: 5px 0;
+            color: white;
+        }
+        footer a {
+            color: #a7ffeb;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -140,7 +166,7 @@
 
     <div class="input-group">
         <label for="skin-color">Color de Piel:</label>
-        <input type="text" id="skin-color" placeholder="ej. blanco, moreno">
+        <input type="text" id="skin-color" placeholder="ej. blanca, morena">
     </div>
 
     <div class="input-group">
@@ -171,6 +197,12 @@
         <a id="download-btn" href="#" download="pictograma.jpg">Descargar Pictograma</a>
     </div>
 </div>
+
+<footer>
+    <p>Creado con ❤️ por **[Tu nombre aquí]**</p>
+    <p>Asistencia de IA: **Juno**</p>
+    <p>Inspirado por: **Santiago**</p>
+</footer>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
