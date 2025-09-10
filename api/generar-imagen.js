@@ -1,7 +1,6 @@
 const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
-    // CORS para permitir solicitudes desde tu página web
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -20,43 +19,40 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'El prompt es requerido' });
     }
 
-    // --- Usamos las variables de entorno de Vercel ---
     const HF_TOKEN = process.env.CLAVE_CLIENTE;
     const HF_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
 
-    // Creamos un prompt base estructurado para un pictograma
+    // Creamos un prompt base estructurado para un pictograma con estilo de cuento infantil
     let promptParts = [
-        "Un pictograma, estilo de ilustrador de cuentos infantiles, un personaje sin sombras",
+        "Un pictograma, estilo de cuento infantil, simple, limpio, personaje sin sombras, vista frontal, ilustración digital plana",
         "con cabello semi-rizado"
     ];
 
     if (skinColor) {
-        promptParts.push(`color de piel ${skinColor}`);
+        promptParts.push(`piel ${skinColor}`);
     }
     if (eyeColor) {
-        promptParts.push(`ojos de color ${eyeColor}`);
+        promptParts.push(`ojos ${eyeColor}`);
     }
     if (hairColor) {
-        promptParts.push(`cabello de color ${hairColor}`);
+        promptParts.push(`cabello ${hairColor}`);
     }
     if (shirtLetter) {
-        promptParts.push(`una letra ${shirtLetter} en la camisa`);
+        promptParts.push(`con la letra ${shirtLetter} en la camisa`);
     }
 
-    // Unimos las partes de personalización
     let personalizationPrompt = promptParts.join(', ');
 
-    // Añadir la intención al prompt
-    let finalPrompt = `${personalizationPrompt}, con el texto "${prompt}"`;
+    let finalPrompt = `${personalizationPrompt}, que muestre "${prompt}"`;
 
     if (intention === 'corregir') {
-        finalPrompt += ', un gran círculo rojo y una línea diagonal sobre el personaje';
+        finalPrompt += ', sobre un gran círculo rojo y una línea diagonal, prohibido';
     } else {
-        finalPrompt += ', un pictograma de acción enmarcado en un círculo verde';
+        finalPrompt += ', enmarcado en un círculo verde, acción';
     }
     
-    // Lista de lo que NO queremos en la imagen
-    const negativePrompt = "arte, pintura, dibujo a mano, dibujo, oscuro, sucio, feo, no un pictograma, texto, firma, marca de agua, blur, low quality, mala calidad, desenfocado, desordenado, distorted, malformado, manos deformes, blurry eyes, complex background, fondo complicado";
+    // Lista de lo que NO queremos en la imagen, más reforzada
+    const negativePrompt = "arte, pintura, dibujo a mano, dibujo, oscuro, sucio, feo, no un pictograma, texto, firma, marca de agua, blur, low quality, mala calidad, desenfocado, desordenado, distorted, malformado, manos deformes, blurry eyes, complex background, fondo complicado, realista, 3D, fotografía, sombreado, detallado, texturas, adultos";
 
     try {
         const response = await fetch(HF_API_URL, {
