@@ -22,7 +22,6 @@ module.exports = async (req, res) => {
 
     // --- Usamos las variables de entorno de Vercel ---
     const HF_TOKEN = process.env.CLAVE_CLIENTE;
-    // Esta es la dirección del modelo de Stable Diffusion 1.0, que ya no dará error
     const HF_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
 
     // En tu prompt se incluirá el texto para generar imágenes semi-rizadas.
@@ -51,6 +50,8 @@ module.exports = async (req, res) => {
         fullPrompt += `, con la letra ${shirtLetter} en la camisa`;
     }
 
+    const negativePrompt = "arte, pintura, dibujo a mano, dibujo, oscuro, sucio, feo, no un pictograma, texto, firma, marca de agua, blur, low quality, mala calidad, desenfocado, desordenado, distorted, malformado, manos deformes, blurry eyes";
+
     try {
         const response = await fetch(HF_API_URL, {
             method: 'POST',
@@ -59,7 +60,8 @@ module.exports = async (req, res) => {
                 "Authorization": `Bearer ${HF_TOKEN}`
             },
             body: JSON.stringify({
-                "inputs": fullPrompt
+                "inputs": fullPrompt,
+                "negative_prompt": negativePrompt
             })
         });
 
@@ -72,7 +74,6 @@ module.exports = async (req, res) => {
             });
         }
 
-        // La respuesta de Hugging Face es una imagen binaria
         const imageBuffer = await response.buffer();
         const base64Image = imageBuffer.toString('base64');
         const dataURI = `data:image/jpeg;base64,${base64Image}`;
