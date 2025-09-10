@@ -20,12 +20,11 @@ module.exports = async (req, res) => {
     }
 
     const HF_TOKEN = process.env.CLAVE_CLIENTE;
-    const HF_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
+    const HF_API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"; // ¡Aquí está el cambio!
 
-    // Creamos un prompt base estructurado para un pictograma con estilo de cuento infantil
     let promptParts = [
-        "Un pictograma, estilo de cuento infantil, simple, limpio, personaje sin sombras, vista frontal, ilustración digital plana",
-        "con cabello semi-rizado"
+        "Un pictograma, estilo de dibujo de libro infantil, simple, limpio, personaje sin sombras, fondo blanco, ilustración vectorial",
+        "con el cabello semi-rizado"
     ];
 
     if (skinColor) {
@@ -51,7 +50,6 @@ module.exports = async (req, res) => {
         finalPrompt += ', enmarcado en un círculo verde, acción';
     }
     
-    // Lista de lo que NO queremos en la imagen, más reforzada
     const negativePrompt = "arte, pintura, dibujo a mano, dibujo, oscuro, sucio, feo, no un pictograma, texto, firma, marca de agua, blur, low quality, mala calidad, desenfocado, desordenado, distorted, malformado, manos deformes, blurry eyes, complex background, fondo complicado, realista, 3D, fotografía, sombreado, detallado, texturas, adultos";
 
     try {
