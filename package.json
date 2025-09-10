@@ -1,0 +1,12 @@
+{
+  "name": "gemini-proyecto",
+  "version": "1.0.0",
+  "description": "Un generador de pictogramas con IA para la comunidad neurodivergente.",
+  "main": "api/generar-imagen.js",
+  "scripts": {
+    "start": "node api/generar-imagen.js"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
