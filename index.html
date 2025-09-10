@@ -1,62 +1,224 @@
-const fetch = require('node-fetch');
-
-module.exports = async (req, res) => {
-    // CORS para permitir solicitudes desde tu página web
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Método no permitido' });
-    }
-
-    const { prompt } = req.body;
-
-    if (!prompt) {
-        return res.status(400).json({ error: 'El prompt es requerido' });
-    }
-
-    // IMPORTANTE: Lee la clave de las variables de entorno de Vercel
-    const API_KEY = process.env.CLAVE_CLIENTE;
-    // La URL REAL de la API de OpenAI para generar imágenes
-    const REAL_API_URL = 'https://api.openai.com/v1/images/generations';
-
-    try {
-        // En tu prompt se incluirá el texto para generar imágenes semi-rizadas.
-        const fullPrompt = `${prompt}, pictograma, cabello semi-rizado`;
-        
-        const response = await fetch(REAL_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
-            },
-            body: JSON.stringify({
-                model: "dall-e-2",
-                prompt: fullPrompt,
-                n: 1,
-                size: "512x512"
-            })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.text();
-            console.error('Error de OpenAI:', errorData);
-            return res.status(response.status).json({ 
-                error: 'Error de la API de IA', 
-                details: errorData 
-            });
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Pictogramas - Un Puente de Comunicación</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Comfortaa', cursive;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #464e49 0%, #2c3e50 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            box-sizing: border-box;
         }
+        .container {
+            background-color: rgba(60, 70, 80, 0.85);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid rgba(243, 229, 177, 0.3);
+        }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 0.8em;
+            color: #f3e5b1;
+            font-family: 'Quicksand', sans-serif;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .welcome-message {
+            margin-bottom: 2em;
+            color: #b0c4de;
+            font-size: 1.1em;
+            line-height: 1.6;
+            padding: 0 15px;
+        }
+        #user-prompt {
+            width: calc(100% - 22px);
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 17px;
+            border-radius: 8px;
+            border: 1px solid #778899;
+            background-color: #f8f8f8;
+            color: #333;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        #user-prompt:focus {
+            border-color: #f3e5b1;
+            box-shadow: 0 0 8px rgba(243, 229, 177, 0.6);
+            outline: none;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #f3e5b1;
+            color: #464e49;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        button:hover {
+            background-color: #e0d0a0;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        #image-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+        #pictogram-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+            margin-top: 25px;
+            border: 3px solid #f3e5b1;
+        }
+        .error {
+            color: #ff6b6b;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .loading {
+            color: #f3e5b1;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        #download-link {
+            display: inline-block;
+            padding: 12px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #87ceeb;
+            color: #fff;
+            text-decoration: none;
+            margin-top: 20px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        #download-link:hover {
+            background-color: #6495ed;
+            transform: translateY(-2px);
+        }
+        #download-link:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        /* Estilos responsivos para pantallas pequeñas */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            .welcome-message {
+                font-size: 1em;
+            }
+            button, #download-link {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Pictogramas</h1>
+        <p class="welcome-message">
+            Bienvenido/a a un espacio donde la comunicación florece sin límites. Aquí, transformamos palabras en imágenes, creando puentes visuales que conectan mentes y corazones. Sabemos que cada voz es única y cada imagen, una oportunidad para entender y ser entendido. ¡Crea, comparte y celebra la diversidad con nosotros!
+        </p>
 
-        const data = await response.json();
-        const imageUrl = data.data[0].url;
+        <input type="text" id="user-prompt" placeholder="Describe el pictograma que quieres">
+        <button onclick="generatePictogram()">Generar Pictograma</button>
 
-        res.status(200).json({ imageUrl: imageUrl });
-    } catch (error) {
+        <div id="image-container">
+            <p class="error" id="error-message" style="display: none;"></p>
+            <p class="loading" id="loading-message" style="display: none;">Creando magia visual...</p>
+            <img id="pictogram-image" alt="Pictograma generado" style="display: none;">
+            <br>
+            <a id="download-link" style="display: none;" href="#" download="pictograma.png">Descargar Pictograma</a>
+        </div>
+    </div>
+
+    <script>
+        const promptInput = document.getElementById('user-prompt');
+        const pictogramImage = document.getElementById('pictogram-image');
+        const loadingMessage = document.getElementById('loading-message');
+        const errorMessage = document.getElementById('error-message');
+        const downloadLink = document.getElementById('download-link');
+
+        // La URL de tu servidor en Vercel
+        const API_URL = '/api/generar-imagen';
+
+        async function generatePictogram() {
+            const prompt = promptInput.value.trim();
+
+            if (!prompt) {
+                errorMessage.textContent = '¡Oh no! Parece que olvidaste describir tu pictograma. Inténtalo de nuevo.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            loadingMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            pictogramImage.style.display = 'none';
+            downloadLink.style.display = 'none';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.details || '¡Ups! Hubo un problema al generar tu pictograma. Por favor, intenta de nuevo.');
+                }
+
+                const data = await response.json();
+                pictogramImage.src = data.imageUrl;
+                pictogramImage.style.display = 'block';
+                downloadLink.href = data.imageUrl;
+                downloadLink.style.display = 'block';
+
+            } catch (error) {
+                errorMessage.textContent = `Error: ${error.message}. ¡No te rindas! Prueba con otra descripción.`;
+                errorMessage.style.display = 'block';
+                console.error('Error:', error);
+            } finally {
+                loadingMessage.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
         console.error('Error en la función:', error);
         res.status(500).json({ error: 'Error interno del servidor', details: error.message });
     }
