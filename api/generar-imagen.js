@@ -24,33 +24,39 @@ module.exports = async (req, res) => {
     const HF_TOKEN = process.env.CLAVE_CLIENTE;
     const HF_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
 
-    // En tu prompt se incluirá el texto para generar imágenes semi-rizadas.
-    let fullPrompt = `${prompt}, pictograma, cabello semi-rizado`;
+    // Creamos un prompt base estructurado para un pictograma
+    let promptParts = [
+        "Un pictograma, estilo de ilustrador de cuentos infantiles, un personaje sin sombras",
+        "con cabello semi-rizado"
+    ];
 
-    // Añadir la intención y personalización al prompt
+    if (skinColor) {
+        promptParts.push(`color de piel ${skinColor}`);
+    }
+    if (eyeColor) {
+        promptParts.push(`ojos de color ${eyeColor}`);
+    }
+    if (hairColor) {
+        promptParts.push(`cabello de color ${hairColor}`);
+    }
+    if (shirtLetter) {
+        promptParts.push(`una letra ${shirtLetter} en la camisa`);
+    }
+
+    // Unimos las partes de personalización
+    let personalizationPrompt = promptParts.join(', ');
+
+    // Añadir la intención al prompt
+    let finalPrompt = `${personalizationPrompt}, con el texto "${prompt}"`;
+
     if (intention === 'corregir') {
-        fullPrompt += ', con un gran círculo rojo y una línea diagonal sobre el personaje';
+        finalPrompt += ', un gran círculo rojo y una línea diagonal sobre el personaje';
     } else {
-        fullPrompt += ', un pictograma de acción enmarcado en un círculo verde';
+        finalPrompt += ', un pictograma de acción enmarcado en un círculo verde';
     }
     
-    if (skinColor) {
-        fullPrompt += `, color de piel ${skinColor}`;
-    }
-
-    if (eyeColor) {
-        fullPrompt += `, ojos de color ${eyeColor}`;
-    }
-
-    if (hairColor) {
-        fullPrompt += `, cabello de color ${hairColor}`;
-    }
-
-    if (shirtLetter) {
-        fullPrompt += `, con la letra ${shirtLetter} en la camisa`;
-    }
-
-    const negativePrompt = "arte, pintura, dibujo a mano, dibujo, oscuro, sucio, feo, no un pictograma, texto, firma, marca de agua, blur, low quality, mala calidad, desenfocado, desordenado, distorted, malformado, manos deformes, blurry eyes";
+    // Lista de lo que NO queremos en la imagen
+    const negativePrompt = "arte, pintura, dibujo a mano, dibujo, oscuro, sucio, feo, no un pictograma, texto, firma, marca de agua, blur, low quality, mala calidad, desenfocado, desordenado, distorted, malformado, manos deformes, blurry eyes, complex background, fondo complicado";
 
     try {
         const response = await fetch(HF_API_URL, {
@@ -60,7 +66,7 @@ module.exports = async (req, res) => {
                 "Authorization": `Bearer ${HF_TOKEN}`
             },
             body: JSON.stringify({
-                "inputs": fullPrompt,
+                "inputs": finalPrompt,
                 "negative_prompt": negativePrompt
             })
         });
