@@ -1,56 +1,62 @@
 const fetch = require('node-fetch');
 
 module.exports = async (req, res) => {
-  // CORS para permitir solicitudes desde tu página web
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    // CORS para permitir solicitudes desde tu página web
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
 
-  const { prompt } = req.body;
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Método no permitido' });
+    }
 
-  if (!prompt) {
-    return res.status(400).json({ error: 'El prompt es requerido' });
-  }
+    const { prompt } = req.body;
 
-  // IMPORTANTE: Lee la clave de las variables de entorno de Vercel
-  const API_KEY = process.env.CLAVE_CLIENTE;
-  // La URL REAL de la API de OpenAI para generar imágenes
-  const REAL_API_URL = 'https://api.openai.com/v1/images/generations';
+    if (!prompt) {
+        return res.status(400).json({ error: 'El prompt es requerido' });
+    }
 
-  try {
+    // --- CAMBIOS PARA USAR HUGGING FACE ---
+    const HF_TOKEN = process.env.CLAVE_CLIENTE; // Usamos la misma variable de entorno
+    const HF_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-0.9"; // Usamos un modelo gratuito de Stable Diffusion
+
     // En tu prompt se incluirá el texto para generar imágenes semi-rizadas.
     const fullPrompt = `${prompt}, pictograma, cabello semi-rizado`;
 
-    const response = await fetch(REAL_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "dall-e-2",
-        prompt: fullPrompt,
-        n: 1,
-        size: "512x512"
-      })
-    });
+    try {
+        const response = await fetch(HF_API_URL, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${HF_TOKEN}`
+            },
+            body: JSON.stringify({
+                "inputs": fullPrompt
+            })
+        });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error de OpenAI:', errorText);
-      throw new Error(`Error de la API de IA: ${response.status} - ${errorText}`);
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error de Hugging Face:', errorData);
+            return res.status(response.status).json({
+                error: 'Error de la API de IA',
+                details: errorData.error
+            });
+        }
+
+        // La respuesta de Hugging Face es una imagen binaria
+        const imageBuffer = await response.buffer();
+        const base64Image = imageBuffer.toString('base64');
+        const dataURI = `data:image/jpeg;base64,${base64Image}`;
+
+        res.status(200).json({ imageUrl: dataURI });
+
+    } catch (error) {
+        console.error('Error en la función:', error);
+        res.status(500).json({ error: 'Error interno del servidor', details: error.message });
     }
-
-    const data = await response.json();
-    const imageUrl = data.data[0].url;
-
-    res.status(200).json({ imageUrl: imageUrl });
-  } catch (error) {
-    console.error('Error en la función:', error);
-    res.status(500).json({ error: 'Error al generar la imagen', details: error.message });
-  }
 };
