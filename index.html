@@ -3,223 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Pictogramas - Un Puente de Comunicación</title>
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <title>Generador de Pictogramas</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
-            font-family: 'Comfortaa', cursive;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #e0f7fa;
+            color: #333;
             display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #464e49 0%, #2c3e50 100%);
-            color: #e0e0e0;
-            padding: 20px;
-            box-sizing: border-box;
+            text-align: center;
         }
         .container {
-            background-color: rgba(60, 70, 80, 0.85);
-            border-radius: 15px;
+            background-color: #fff;
             padding: 30px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             max-width: 600px;
             width: 100%;
-            margin-top: 20px;
-            border: 1px solid rgba(243, 229, 177, 0.3);
         }
         h1 {
-            margin-top: 0;
-            margin-bottom: 0.8em;
-            color: #f3e5b1;
-            font-family: 'Quicksand', sans-serif;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            color: #00796b;
+            margin-bottom: 10px;
+            font-size: 2em;
         }
-        .welcome-message {
-            margin-bottom: 2em;
-            color: #b0c4de;
-            font-size: 1.1em;
+        p {
+            color: #555;
             line-height: 1.6;
-            padding: 0 15px;
+            margin-bottom: 25px;
         }
-        #user-prompt {
+        input[type="text"] {
             width: calc(100% - 22px);
-            padding: 12px;
-            margin-bottom: 20px;
-            font-size: 17px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
             border-radius: 8px;
-            border: 1px solid #778899;
-            background-color: #f8f8f8;
-            color: #333;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
+            font-size: 1em;
+            box-sizing: border-box;
         }
-        #user-prompt:focus {
-            border-color: #f3e5b1;
-            box-shadow: 0 0 8px rgba(243, 229, 177, 0.6);
-            outline: none;
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 15px;
         }
         button {
-            padding: 12px 25px;
-            font-size: 18px;
-            cursor: pointer;
+            padding: 12px 20px;
             border: none;
             border-radius: 8px;
-            background-color: #f3e5b1;
-            color: #464e49;
-            font-family: 'Quicksand', sans-serif;
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            flex-grow: 1;
         }
-        button:hover {
-            background-color: #e0d0a0;
+        button#corregir-btn {
+            background-color: #d32f2f;
+            color: white;
+        }
+        button#corregir-btn:hover {
+            background-color: #b71c1c;
             transform: translateY(-2px);
         }
-        button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        button#cotidiana-btn {
+            background-color: #00796b;
+            color: white;
+        }
+        button#cotidiana-btn:hover {
+            background-color: #004d40;
+            transform: translateY(-2px);
         }
         #image-container {
-            margin-top: 30px;
-            text-align: center;
+            margin-top: 20px;
+            position: relative;
         }
-        #pictogram-image {
+        #result-image {
             max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-            margin-top: 25px;
-            border: 3px solid #f3e5b1;
-        }
-        .error {
-            color: #ff6b6b;
-            margin-top: 15px;
-            font-weight: bold;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            display: none; /* Se muestra solo cuando hay imagen */
         }
         .loading {
-            color: #f3e5b1;
-            margin-top: 15px;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-        #download-link {
-            display: inline-block;
-            padding: 12px 25px;
-            font-size: 18px;
-            cursor: pointer;
-            border: none;
-            border-radius: 8px;
-            background-color: #87ceeb;
-            color: #fff;
-            text-decoration: none;
+            display: none;
             margin-top: 20px;
-            font-family: 'Quicksand', sans-serif;
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            font-size: 1.2em;
+            color: #00796b;
         }
-        #download-link:hover {
-            background-color: #6495ed;
-            transform: translateY(-2px);
+        #download-btn {
+            display: none;
+            background-color: #004d40;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
         }
-        #download-link:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        #download-btn:hover {
+            background-color: #00251a;
         }
-        /* Estilos responsivos para pantallas pequeñas */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
-            }
-            .welcome-message {
-                font-size: 1em;
-            }
-            button, #download-link {
-                padding: 10px 20px;
-                font-size: 16px;
-            }
+        .error-message {
+            color: #d32f2f;
+            margin-top: 15px;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Generador de Pictogramas</h1>
-        <p class="welcome-message">
-            Bienvenido/a a un espacio donde la comunicación florece sin límites. Aquí, transformamos palabras en imágenes, creando puentes visuales que conectan mentes y corazones. Sabemos que cada voz es única y cada imagen, una oportunidad para entender y ser entendido. ¡Crea, comparte y celebra la diversidad con nosotros!
-        </p>
 
-        <input type="text" id="user-prompt" placeholder="Describe el pictograma que quieres">
-        <button onclick="generatePictogram()">Generar Pictograma</button>
+<div class="container">
+    <h1>Generador de Pictogramas</h1>
+    <p>
+        Bienvenido/a a un espacio donde la comunicación florece sin límites. Aquí, transformamos palabras en imágenes, creando puentes visuales que conectan mentes y corazones. Sabemos que cada voz es única y cada imagen, una oportunidad para entender y ser entendido. ¡Crea, comparte y celebra la diversidad con nosotros!
+    </p>
 
-        <div id="image-container">
-            <p class="error" id="error-message" style="display: none;"></p>
-            <p class="loading" id="loading-message" style="display: none;">Creando magia visual...</p>
-            <img id="pictogram-image" alt="Pictograma generado" style="display: none;">
-            <br>
-            <a id="download-link" style="display: none;" href="#" download="pictograma.png">Descargar Pictograma</a>
-        </div>
+    <input type="text" id="prompt-input" placeholder="Describe el pictograma que quieres">
+
+    <div class="button-container">
+        <button id="corregir-btn"><i class="fas fa-ban"></i> Conducta a Corregir</button>
+        <button id="cotidiana-btn">Conducta Cotidiana</button>
     </div>
 
-    <script>
-        const promptInput = document.getElementById('user-prompt');
-        const pictogramImage = document.getElementById('pictogram-image');
-        const loadingMessage = document.getElementById('loading-message');
-        const errorMessage = document.getElementById('error-message');
-        const downloadLink = document.getElementById('download-link');
+    <div class="loading" id="loading">Generando imagen...</div>
+    <div class="error-message" id="error-message"></div>
 
-        // La URL de tu servidor en Vercel
-        const API_URL = '/api/generar-imagen';
+    <div id="image-container">
+        <img id="result-image" alt="Pictograma generado por IA">
+        <a id="download-btn" href="#" download="pictograma.jpg">Descargar Pictograma</a>
+    </div>
+</div>
 
-        async function generatePictogram() {
-            const prompt = promptInput.value.trim();
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const promptInput = document.getElementById('prompt-input');
+    const corregirBtn = document.getElementById('corregir-btn');
+    const cotidianaBtn = document.getElementById('cotidiana-btn');
+    const loading = document.getElementById('loading');
+    const errorMsg = document.getElementById('error-message');
+    const resultImage = document.getElementById('result-image');
+    const downloadBtn = document.getElementById('download-btn');
 
-            if (!prompt) {
-                errorMessage.textContent = '¡Oh no! Parece que olvidaste describir tu pictograma. Inténtalo de nuevo.';
-                errorMessage.style.display = 'block';
-                return;
-            }
-
-            loadingMessage.style.display = 'block';
-            errorMessage.style.display = 'none';
-            pictogramImage.style.display = 'none';
-            downloadLink.style.display = 'none';
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ prompt: prompt })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.details || '¡Ups! Hubo un problema al generar tu pictograma. Por favor, intenta de nuevo.');
-                }
-
-                const data = await response.json();
-                pictogramImage.src = data.imageUrl;
-                pictogramImage.style.display = 'block';
-                downloadLink.href = data.imageUrl;
-                downloadLink.style.display = 'block';
-
-            } catch (error) {
-                errorMessage.textContent = `Error: ${error.message}. ¡No te rindas! Prueba con otra descripción.`;
-                errorMessage.style.display = 'block';
-                console.error('Error:', error);
-            } finally {
-                loadingMessage.style.display = 'none';
-            }
+    const generateImage = async (intention) => {
+        const prompt = promptInput.value.trim();
+        if (!prompt) {
+            alert('Por favor, escribe una descripción.');
+            return;
         }
-    </script>
+
+        loading.style.display = 'block';
+        errorMsg.style.display = 'none';
+        resultImage.style.display = 'none';
+        downloadBtn.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/generar-imagen', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt, intention })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.details || 'Error al generar la imagen.');
+            }
+
+            const data = await response.json();
+            resultImage.src = data.imageUrl;
+            resultImage.onload = () => {
+                loading.style.display = 'none';
+                resultImage.style.display = 'block';
+                downloadBtn.style.display = 'inline-block';
+                downloadBtn.href = data.imageUrl;
+            };
+
+        } catch (error) {
+            console.error('Error:', error);
+            loading.style.display = 'none';
+            errorMsg.textContent = 'Error: No se pudo generar el pictograma. Inténtalo de nuevo.';
+            errorMsg.style.display = 'block';
+        }
+    };
+
+    corregirBtn.addEventListener('click', () => generateImage('corregir'));
+    cotidianaBtn.addEventListener('click', () => generateImage('cotidiana'));
+});
+</script>
+
 </body>
 </html>
-        console.error('Error en la función:', error);
-        res.status(500).json({ error: 'Error interno del servidor', details: error.message });
-    }
-};
