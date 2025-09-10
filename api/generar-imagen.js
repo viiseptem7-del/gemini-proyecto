@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
         return res.status(405).json({ error: 'Método no permitido' });
     }
 
-    const { prompt } = req.body;
+    const { prompt, intention, skinColor, eyeColor, hairColor, shirtLetter } = req.body;
 
     if (!prompt) {
         return res.status(400).json({ error: 'El prompt es requerido' });
@@ -26,7 +26,30 @@ module.exports = async (req, res) => {
     const HF_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
 
     // En tu prompt se incluirá el texto para generar imágenes semi-rizadas.
-    const fullPrompt = `${prompt}, pictograma, cabello semi-rizado`;
+    let fullPrompt = `${prompt}, pictograma, cabello semi-rizado`;
+
+    // Añadir la intención y personalización al prompt
+    if (intention === 'corregir') {
+        fullPrompt += ', con un gran círculo rojo y una línea diagonal sobre el personaje';
+    } else {
+        fullPrompt += ', un pictograma de acción enmarcado en un círculo verde';
+    }
+    
+    if (skinColor) {
+        fullPrompt += `, color de piel ${skinColor}`;
+    }
+
+    if (eyeColor) {
+        fullPrompt += `, ojos de color ${eyeColor}`;
+    }
+
+    if (hairColor) {
+        fullPrompt += `, cabello de color ${hairColor}`;
+    }
+
+    if (shirtLetter) {
+        fullPrompt += `, con la letra ${shirtLetter} en la camisa`;
+    }
 
     try {
         const response = await fetch(HF_API_URL, {
