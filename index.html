@@ -35,7 +35,7 @@
             line-height: 1.6;
             margin-bottom: 25px;
         }
-        input[type="text"] {
+        input[type="text"], input[type="color"] {
             width: calc(100% - 22px);
             padding: 10px;
             margin-bottom: 15px;
@@ -43,6 +43,23 @@
             border-radius: 8px;
             font-size: 1em;
             box-sizing: border-box;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            width: 120px;
+            text-align: left;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+        .input-group input[type="color"] {
+            width: 50px;
+            height: 35px;
+            padding: 0;
+            border: 1px solid #ccc;
         }
         .button-container {
             display: flex;
@@ -83,7 +100,7 @@
             max-width: 100%;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-            display: none; /* Se muestra solo cuando hay imagen */
+            display: none;
         }
         .loading {
             display: none;
@@ -121,6 +138,26 @@
 
     <input type="text" id="prompt-input" placeholder="Describe el pictograma que quieres">
 
+    <div class="input-group">
+        <label for="skin-color">Color de Piel:</label>
+        <input type="text" id="skin-color" placeholder="ej. blanco, moreno">
+    </div>
+
+    <div class="input-group">
+        <label for="eye-color">Color de Ojos:</label>
+        <input type="text" id="eye-color" placeholder="ej. café, azul, verde">
+    </div>
+
+    <div class="input-group">
+        <label for="hair-color">Color de Pelo:</label>
+        <input type="text" id="hair-color" placeholder="ej. castaño, rubio, negro">
+    </div>
+
+    <div class="input-group">
+        <label for="shirt-letter">Letra en la Camisa:</label>
+        <input type="text" id="shirt-letter" maxlength="1" placeholder="ej. A">
+    </div>
+
     <div class="button-container">
         <button id="corregir-btn"><i class="fas fa-ban"></i> Conducta a Corregir</button>
         <button id="cotidiana-btn">Conducta Cotidiana</button>
@@ -138,6 +175,10 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const promptInput = document.getElementById('prompt-input');
+    const skinColorInput = document.getElementById('skin-color');
+    const eyeColorInput = document.getElementById('eye-color');
+    const hairColorInput = document.getElementById('hair-color');
+    const shirtLetterInput = document.getElementById('shirt-letter');
     const corregirBtn = document.getElementById('corregir-btn');
     const cotidianaBtn = document.getElementById('cotidiana-btn');
     const loading = document.getElementById('loading');
@@ -147,6 +188,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const generateImage = async (intention) => {
         const prompt = promptInput.value.trim();
+        const skinColor = skinColorInput.value.trim();
+        const eyeColor = eyeColorInput.value.trim();
+        const hairColor = hairColorInput.value.trim();
+        const shirtLetter = shirtLetterInput.value.trim();
+
         if (!prompt) {
             alert('Por favor, escribe una descripción.');
             return;
@@ -161,7 +207,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/generar-imagen', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt, intention })
+                body: JSON.stringify({
+                    prompt,
+                    intention,
+                    skinColor,
+                    eyeColor,
+                    hairColor,
+                    shirtLetter
+                })
             });
 
             if (!response.ok) {
