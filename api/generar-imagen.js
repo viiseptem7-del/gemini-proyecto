@@ -20,9 +20,10 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'El prompt es requerido' });
     }
 
-    // --- CAMBIOS PARA USAR HUGGING FACE ---
-    const HF_TOKEN = process.env.CLAVE_CLIENTE; // Usamos la misma variable de entorno
-    const HF_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-0.9"; // Usamos un modelo gratuito de Stable Diffusion
+    // --- Usamos las variables de entorno de Vercel ---
+    const HF_TOKEN = process.env.CLAVE_CLIENTE;
+    // Esta es la dirección del modelo de Stable Diffusion 1.0, que ya no dará error
+    const HF_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
 
     // En tu prompt se incluirá el texto para generar imágenes semi-rizadas.
     const fullPrompt = `${prompt}, pictograma, cabello semi-rizado`;
